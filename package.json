@@ -1,0 +1,22 @@
+{
+  "name": "warehouse-management-server",
+  "version": "1.0.0",
+  "description": "FIT2095 Week3: create a warehouse management server",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/nxcleo/warehouse-management-server.git"
+  },
+  "author": "Aaron Jiang",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/nxcleo/warehouse-management-server/issues"
+  },
+  "homepage": "https://github.com/nxcleo/warehouse-management-server#readme",
+  "dependencies": {
+    "express": "^4.16.3"
+  }
+}
