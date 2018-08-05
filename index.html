@@ -10,47 +10,142 @@
 <body>
     <div class="container">
         <div class="page-header">
-            <h1>Login here</h1>
+            <h1>Warehouse Management</h1>
         </div>
 
         <div class="jumbotron">
 
-                <div class="form-group">
-                    <label for="form_uid">Username</label>
-                    <input type="text" class="form-control" id="form_uid">
-                </div>
-
-                <div class="form-group">
-                    <label for="form_pass">Password</label>
-                    <input type="password" class="form-control" id="form_pass">
-                </div>
-
-                <div class="form-group">
-                    <input type="submit" value="Submit" class="btn btn-primary" id="form_submit">
-                </div>
-
-
+            <table class="table">
+                <thead class="thead-dark">
+                    <tr>
+                        <th scope="col">Product ID</th>
+                        <th scope="col">Name</th>
+                        <th scope="col">Quantity</th>
+                        <th scope="col">Price (AUD)</th>
+                        <th scope="col">Cost (AUD)</th>
+                        <th scope="col">Remove Item</th>
+                    </tr>
+                </thead>
+                <tbody id="table-entry">
+                </tbody>
+            </table>
         </div>
+
+        <div style="float: left; width:47%">
+            <div id="rightdiv" class="jumbotron">
+                <h2>Add new item</h2>
+
+                <div class="form-group">
+                    <label for="form_name">Name</label>
+                    <input type="text" class="form-control" id="form_name">
+                </div>
+
+                <div class="form-group">
+                    <label for="form_quan">Quantity</label>
+                    <input type="text" class="form-control" id="form_quan">
+                </div>
+
+                <div class="form-group">
+                    <label for="form_price">Price</label>
+                    <input type="text" class="form-control" id="form_price">
+                </div>
+
+                <div class="form-group">
+                    <input type="submit" value="Submit" class="btn btn-primary" id="form_submit" onclick="addEntry()">
+                </div>
+            </div>
+        </div>
+        <div style="float: right; width:47%; height: 100px">
+            <div id="leftdiv" class="jumbotron">
+                <h2>Warehouse Total Value</h2>
+                <br>
+                <hr class="my-4">
+                <h1 class="display-4">43333 AUD</h1>
+                <hr>
+                <br>
+                <button type="button" class="btn btn-primary btn-lg btn-block">Block level button</button>
+            </div>
+        </div>
+
 
     </div>
 
 
 <script type="text/javascript">
 
-    document.getElementById('form_submit').addEventListener('click', function() {
-        window.location.href = "google.com"
-        let params = {
-            name: document.getElementById("form_uid").value,
-            pass: document.getElementById("form_pass").value
-        };
-        let esc = encodeURIComponent;
-        let query = Object.keys(params)
-            .map(k => esc(k) + '=' + esc(params[k]))
-            .join('&');
-        window.location.replace("http://localhost:8080/login?" + query);
-    });
+    loadTable();
+
+    function loadTable() {
+        let Httpreq = new XMLHttpRequest();
+        Httpreq.open("GET", "http://localhost:8080/listallitems", true);
+        Httpreq.onload = function()
+        {
+            let warehouseData = JSON.parse(Httpreq.responseText);
+            console.log(warehouseData);
+            for(var i=0; i<warehouseData.length; i++)
+            {
+                let item = warehouseData[i];
+                appendTable(item.id, item.name, item.quantity, item.price, item.cost);
+            }
+        }
+        Httpreq.send(null);
+
+    }
 
 
+    function deleteEntry(id){
+
+        let Httpreq = new XMLHttpRequest();
+        Httpreq.open("GET", "http://localhost:8080/delete/" + id, true);
+        Httpreq.onload = function()
+        {
+            let success = JSON.parse(Httpreq.responseText);
+            console.log(success);
+            if (success){
+                let elem = document.getElementById(id);
+                elem.parentNode.removeChild(elem);
+            }
+            else {
+                alert("Error: Item " + id + " not found in warehouse database!");
+            }
+        }
+        Httpreq.send(null);
+
+    }
+
+    function addEntry(){
+        let name = document.getElementById("form_name");
+        let quan = document.getElementById("form_quan");
+        let price = document.getElementById("form_price");
+
+        let Httpreq = new XMLHttpRequest();
+        Httpreq.open("GET", "http://localhost:8080/additem/" + name.value + "/"+ quan.value + "/"+ price.value, true);
+        Httpreq.onload = function()
+        {
+            let item = JSON.parse(Httpreq.responseText);
+            console.log(item);
+            name.value = "";
+            quan.value = "";
+            price.value = "";
+
+            appendTable(item.id, item.name, item.quantity, item.price, item.cost);
+        }
+        Httpreq.send(null);
+    }
+
+    function appendTable(id, name, quan, price, cost) {
+        let table = document.getElementById("table-entry");
+        table.innerHTML = table.innerHTML + "<tr id='" + id + "'>\n" +
+            "<th scope=\"row\">" + id +"</th>\n" +
+            "<td>" + name +"</td>\n" +
+            "<td>" + quan +"</td>\n" +
+            "<td>" + price +"</td>\n" +
+            "<td>" + cost +"</td>\n" +
+            "<td><button type=\"button\" class=\"btn btn-danger btn-sm\" " +
+            "onclick='deleteEntry("+ id +")'" +
+            ">Remove</button></td>\n</tr>"
+
+    }
 
 </script>
 </body>
